@@ -21,3 +21,4 @@ class InventoryLog extends Model
         return $this->belongsTo(User::class);
     }
 }
+// Changed a bit 
