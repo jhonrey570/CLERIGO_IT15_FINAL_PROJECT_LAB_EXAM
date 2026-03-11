@@ -1,1 +1,137 @@
- 
+ import { useState, useEffect } from 'react';
+import api from '../../services/api';
+
+const MenuForm = ({ item, categories, onSaved, onClose }) => {
+  const isEdit = !!item;
+
+  const [form, setForm] = useState({
+    name:                '',
+    description:         '',
+    price:               '',
+    stock_qty:           '',
+    low_stock_threshold: '5',
+    category_id:         '',
+    is_available:        true,
+  });
+  const [error,   setError]   = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (item) {
+      setForm({
+        name:                item.name,
+        description:         item.description || '',
+        price:               item.price,
+        stock_qty:           item.stock_qty,
+        low_stock_threshold: item.low_stock_threshold,
+        category_id:         item.category_id,
+        is_available:        item.is_available,
+      });
+    }
+  }, [item]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      let res;
+      if (isEdit) {
+        res = await api.put(`/menu-items/${item.id}`, form);
+      } else {
+        res = await api.post('/menu-items', form);
+      }
+      onSaved(res.data, isEdit);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-xl font-bold text-gray-800">
+            {isEdit ? 'Edit Menu Item' : 'Add Menu Item'}
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 text-red-600 border border-red-200 rounded-lg px-4 py-2 mb-4 text-sm">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+            <input name="name" value={form.name} onChange={handleChange} required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select name="category_id" value={form.category_id} onChange={handleChange} required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Select category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" value={form.description} onChange={handleChange} rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price (₱)</label>
+              <input name="price" type="number" value={form.price} onChange={handleChange} required min="0" step="0.01"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Stock Qty</label>
+              <input name="stock_qty" type="number" value={form.stock_qty} onChange={handleChange} required min="0"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Low Stock Alert</label>
+              <input name="low_stock_threshold" type="number" value={form.low_stock_threshold} onChange={handleChange} min="0"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input type="checkbox" name="is_available" checked={form.is_available} onChange={handleChange}
+              className="w-4 h-4 accent-blue-600" />
+            <label className="text-sm text-gray-700">Available for ordering</label>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose}
+              className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
+              Cancel
+            </button>
+            <button type="submit" disabled={loading}
+              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50">
+              {loading ? 'Saving...' : isEdit ? 'Update Item' : 'Add Item'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default MenuForm;
