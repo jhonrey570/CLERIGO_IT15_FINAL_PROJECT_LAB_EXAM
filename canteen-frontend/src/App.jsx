@@ -8,6 +8,7 @@ import MenuList from './components/menu/MenuList';
 import POSInterface from './components/orders/POSInterface';
 import OrderQueue from './components/orders/OrderQueue';
 import InventoryTable from './components/inventory/InventoryTable';
+import MyOrders from './components/orders/MyOrders';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -20,12 +21,18 @@ function AppRoutes() {
     );
   }
 
+  const defaultRedirect = () => {
+    if (!user) return '/login';
+    if (user.role === 'admin') return '/dashboard';
+    if (user.role === 'cashier') return '/pos';
+    if (user.role === 'customer') return '/my-orders';
+    return '/login';
+  };
+
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
+      <Route path="/login" element={!user ? <Login /> : <Navigate to={defaultRedirect()} />} />
 
-      {/* Admin Routes */}
       <Route path="/dashboard" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminDashboard />
@@ -42,7 +49,6 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
-      {/* Cashier Routes */}
       <Route path="/pos" element={
         <ProtectedRoute allowedRoles={['cashier', 'admin']}>
           <POSInterface />
@@ -54,9 +60,14 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="/my-orders" element={
+        <ProtectedRoute allowedRoles={['customer']}>
+          <MyOrders />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/" element={<Navigate to={defaultRedirect()} />} />
+      <Route path="*" element={<Navigate to={defaultRedirect()} />} />
     </Routes>
   );
 }
