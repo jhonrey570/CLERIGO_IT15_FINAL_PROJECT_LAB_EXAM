@@ -25,6 +25,8 @@ const OrderQueue = () => {
   const [loading, setLoading] = useState(true);
   const [filter,  setFilter]  = useState('all');
 
+  const isAdmin = user?.role === 'admin';
+
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders');
@@ -74,14 +76,26 @@ const OrderQueue = () => {
           <span className="text-xl font-bold text-gray-800">Order Queue</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">💳 {user?.name}</span>
-          <button onClick={() => navigate('/dashboard')}
-            className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-            Dashboard
-          </button>
+          <span className="text-sm text-gray-600">
+            {isAdmin ? '👑' : '💳'} {user?.name}
+          </span>
+          {isAdmin && (
+            <button onClick={() => navigate('/dashboard')}
+              className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
+              Dashboard
+            </button>
+          )}
           <button onClick={() => navigate('/pos')}
             className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
             POS
+          </button>
+          <button onClick={() => navigate('/menu')}
+            className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
+            Menu
+          </button>
+          <button onClick={() => navigate('/inventory')}
+            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100">
+            Inventory
           </button>
           <button onClick={handleLogout}
             className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">

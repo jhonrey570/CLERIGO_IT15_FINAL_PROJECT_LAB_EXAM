@@ -9,6 +9,8 @@ import POSInterface from './components/orders/POSInterface';
 import OrderQueue from './components/orders/OrderQueue';
 import InventoryTable from './components/inventory/InventoryTable';
 import MyOrders from './components/orders/MyOrders';
+import UserManagement from './components/users/UserManagement';
+import CustomerMenu from './components/customer/CustomerMenu';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -39,13 +41,18 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/menu" element={
-        <ProtectedRoute allowedRoles={['admin']}>
+        <ProtectedRoute allowedRoles={['admin', 'cashier']}>
           <MenuList />
         </ProtectedRoute>
       } />
       <Route path="/inventory" element={
-        <ProtectedRoute allowedRoles={['admin']}>
+        <ProtectedRoute allowedRoles={['admin', 'cashier']}>
           <InventoryTable />
+        </ProtectedRoute>
+      } />
+      <Route path="/users" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <UserManagement />
         </ProtectedRoute>
       } />
 
@@ -63,6 +70,11 @@ function AppRoutes() {
       <Route path="/my-orders" element={
         <ProtectedRoute allowedRoles={['customer']}>
           <MyOrders />
+        </ProtectedRoute>
+      } />
+      <Route path="/customer-menu" element={
+        <ProtectedRoute allowedRoles={['customer']}>
+          <CustomerMenu />
         </ProtectedRoute>
       } />
 

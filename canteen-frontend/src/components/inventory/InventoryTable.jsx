@@ -7,15 +7,17 @@ const InventoryTable = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [items,    setItems]    = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [search,   setSearch]   = useState('');
-  const [adjustItem,  setAdjustItem]  = useState(null);
-  const [adjustQty,   setAdjustQty]   = useState('');
+  const [items,        setItems]        = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [search,       setSearch]       = useState('');
+  const [adjustItem,   setAdjustItem]   = useState(null);
+  const [adjustQty,    setAdjustQty]    = useState('');
   const [adjustReason, setAdjustReason] = useState('');
-  const [adjusting,   setAdjusting]   = useState(false);
-  const [error,    setError]    = useState('');
-  const [success,  setSuccess]  = useState('');
+  const [adjusting,    setAdjusting]    = useState(false);
+  const [error,        setError]        = useState('');
+  const [success,      setSuccess]      = useState('');
+
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchInventory();
@@ -81,11 +83,15 @@ const InventoryTable = () => {
           <span className="text-xl font-bold text-gray-800">Canteen System</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">👑 {user?.name}</span>
-          <button onClick={() => navigate('/dashboard')}
-            className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-            Dashboard
-          </button>
+          <span className="text-sm text-gray-600">
+            {isAdmin ? '👑' : '💳'} {user?.name}
+          </span>
+          {isAdmin && (
+            <button onClick={() => navigate('/dashboard')}
+              className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
+              Dashboard
+            </button>
+          )}
           <button onClick={() => navigate('/menu')}
             className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
             Menu
@@ -93,6 +99,10 @@ const InventoryTable = () => {
           <button onClick={() => navigate('/pos')}
             className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
             POS
+          </button>
+          <button onClick={() => navigate('/orders')}
+            className="text-sm bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg hover:bg-yellow-100">
+            Order Queue
           </button>
           <button onClick={handleLogout}
             className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
@@ -187,7 +197,8 @@ const InventoryTable = () => {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl font-bold text-gray-800">Adjust Stock</h2>
-              <button onClick={() => setAdjustItem(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <button onClick={() => setAdjustItem(null)}
+                className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4 mb-5">
