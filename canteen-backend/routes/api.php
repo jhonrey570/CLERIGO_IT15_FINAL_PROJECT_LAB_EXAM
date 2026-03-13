@@ -7,29 +7,25 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
-// Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
-// Authenticated Routes 
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
 
-    // Categories
-    Route::get('/categories',       [CategoryController::class, 'index']);
+    Route::get('/categories',            [CategoryController::class, 'index']);
     Route::get('/categories/{category}', [CategoryController::class, 'show']);
     Route::middleware('role:admin')->group(function () {
-        Route::post('/categories',            [CategoryController::class, 'store']);
-        Route::put('/categories/{category}',  [CategoryController::class, 'update']);
+        Route::post('/categories',              [CategoryController::class, 'store']);
+        Route::put('/categories/{category}',    [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
     });
 
-    // Menu Items
-    Route::get('/menu-items',           [MenuController::class, 'index']);
+    Route::get('/menu-items',            [MenuController::class, 'index']);
     Route::get('/menu-items/{menuItem}', [MenuController::class, 'show']);
     Route::middleware('role:admin')->group(function () {
         Route::post('/menu-items',                    [MenuController::class, 'store']);
@@ -38,27 +34,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/menu-items/{menuItem}/toggle', [MenuController::class, 'toggle']);
     });
 
-    // Orders
-    Route::get('/orders/my-orders',        [OrderController::class, 'myOrders']);
-    Route::post('/orders',                 [OrderController::class, 'store']);
+    Route::get('/orders/my-orders',   [OrderController::class, 'myOrders']);
+    Route::post('/orders',            [OrderController::class, 'store']);
     Route::middleware('role:admin,cashier')->group(function () {
-        Route::get('/orders',              [OrderController::class, 'index']);
-        Route::get('/orders/{order}',      [OrderController::class, 'show']);
+        Route::get('/orders',                  [OrderController::class, 'index']);
+        Route::get('/orders/{order}',          [OrderController::class, 'show']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });
 
-    // Inventory
     Route::middleware('role:admin,cashier')->group(function () {
-        Route::get('/inventory',                      [InventoryController::class, 'index']);
-        Route::get('/inventory/low-stock',            [InventoryController::class, 'lowStock']);
-        Route::get('/inventory/logs',                 [InventoryController::class, 'logs']);
+        Route::get('/inventory',                     [InventoryController::class, 'index']);
+        Route::get('/inventory/low-stock',           [InventoryController::class, 'lowStock']);
+        Route::get('/inventory/logs',                [InventoryController::class, 'logs']);
+        Route::patch('/inventory/{menuItem}/adjust', [InventoryController::class, 'adjust']);
     });
     Route::middleware('role:admin')->group(function () {
-        Route::patch('/inventory/{menuItem}/adjust',  [InventoryController::class, 'adjust']);
-        Route::post('/inventory/bulk-restock',        [InventoryController::class, 'bulkRestock']);
+        Route::post('/inventory/bulk-restock', [InventoryController::class, 'bulkRestock']);
     });
 
-    // Reports
     Route::middleware('role:admin')->group(function () {
         Route::get('/reports/daily-sales',        [ReportController::class, 'dailySales']);
         Route::get('/reports/weekly-sales',       [ReportController::class, 'weeklySales']);
@@ -67,5 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports/order-volume',       [ReportController::class, 'orderVolume']);
         Route::get('/reports/category-breakdown', [ReportController::class, 'categoryBreakdown']);
         Route::get('/reports/summary',            [ReportController::class, 'summary']);
+    });
+
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/users',           [UserController::class, 'index']);
+        Route::post('/users',          [UserController::class, 'store']);
+        Route::get('/users/{user}',    [UserController::class, 'show']);
+        Route::put('/users/{user}',    [UserController::class, 'update']);
+        Route::delete('/users/{user}', [UserController::class, 'destroy']);
     });
 });
