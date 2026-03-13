@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import Layout from '../common/Layout';
+import { SkeletonBlock, TableRowSkeleton } from '../common/Skeleton';
 
 const InventoryTable = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [items,        setItems]        = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -16,8 +16,6 @@ const InventoryTable = () => {
   const [adjusting,    setAdjusting]    = useState(false);
   const [error,        setError]        = useState('');
   const [success,      setSuccess]      = useState('');
-
-  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchInventory();
@@ -56,67 +54,49 @@ const InventoryTable = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
   const filtered = items.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const lowStockItems = items.filter((i) => i.stock_qty <= i.low_stock_threshold);
 
+  const topbarActions = (
+    <input
+      type="text"
+      placeholder="Search items..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] w-48 md:w-64"
+    />
+  );
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading inventory...</div>
-      </div>
+      <Layout title="Inventory Management" actions={topbarActions}>
+        <div className="p-4 md:p-6">
+          <SkeletonBlock className="h-10 w-full mb-6" />
+          <div className="bg-white rounded-2xl shadow overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  {['Item Name', 'Category', 'Stock Qty', 'Threshold', 'Status', 'Action'].map((h) => (
+                    <th key={h} className="px-6 py-4 text-left text-sm font-semibold text-gray-600">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {Array.from({ length: 8 }).map((_, i) => <TableRowSkeleton key={i} cols={6} />)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen System</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">
-            {isAdmin ? '👑' : '💳'} {user?.name}
-          </span>
-          {isAdmin && (
-            <button onClick={() => navigate('/dashboard')}
-              className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-              Dashboard
-            </button>
-          )}
-          <button onClick={() => navigate('/menu')}
-            className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-            Menu
-          </button>
-          <button onClick={() => navigate('/pos')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-            POS
-          </button>
-          <button onClick={() => navigate('/orders')}
-            className="text-sm bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg hover:bg-yellow-100">
-            Order Queue
-          </button>
-          <button onClick={() => navigate('/inventory/logs')}
-            className="text-sm bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-100">
-            View Logs
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
-
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Inventory Management</h1>
+    <Layout title="Inventory Management" actions={topbarActions}>
+      <div className="p-4 md:p-6">
 
         {success && (
           <div className="bg-green-50 text-green-600 border border-green-200 rounded-xl px-4 py-3 mb-5 text-sm">
@@ -126,7 +106,7 @@ const InventoryTable = () => {
 
         {lowStockItems.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-            <p className="text-red-600 font-semibold mb-2">
+            <p className="text-red-600 font-semibold mb-2 text-sm md:text-base">
               ⚠️ Low Stock Alert — {lowStockItems.length} item(s) need restocking
             </p>
             <div className="flex flex-wrap gap-2">
@@ -139,24 +119,14 @@ const InventoryTable = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow p-4 mb-6">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-          />
-        </div>
-
-        <div className="bg-white rounded-2xl shadow overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-2xl shadow overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-6 py-4 text-gray-600 font-semibold">Item Name</th>
                 <th className="text-left px-6 py-4 text-gray-600 font-semibold">Category</th>
                 <th className="text-center px-6 py-4 text-gray-600 font-semibold">Stock Qty</th>
-                <th className="text-center px-6 py-4 text-gray-600 font-semibold">Low Stock Threshold</th>
+                <th className="text-center px-6 py-4 text-gray-600 font-semibold">Threshold</th>
                 <th className="text-center px-6 py-4 text-gray-600 font-semibold">Status</th>
                 <th className="text-center px-6 py-4 text-gray-600 font-semibold">Action</th>
               </tr>
@@ -184,7 +154,7 @@ const InventoryTable = () => {
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => { setAdjustItem(item); setError(''); }}
-                        className="bg-blue-50 text-blue-600 text-xs px-3 py-1.5 rounded-lg hover:bg-blue-100 font-medium">
+                        className="bg-[#D8BFD8] text-gray-700 text-xs px-3 py-1.5 rounded-lg hover:bg-[#cbaecb] font-medium">
                         Adjust Stock
                       </button>
                     </td>
@@ -197,10 +167,10 @@ const InventoryTable = () => {
       </div>
 
       {adjustItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl font-bold text-gray-800">Adjust Stock</h2>
+              <h2 className="text-lg font-bold text-gray-800">Adjust Stock</h2>
               <button onClick={() => setAdjustItem(null)}
                 className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
@@ -227,7 +197,7 @@ const InventoryTable = () => {
                   onChange={(e) => setAdjustQty(e.target.value)}
                   required
                   placeholder="Use positive to add, negative to deduct"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
                 />
                 <p className="text-xs text-gray-400 mt-1">e.g. +10 to restock, -5 to deduct</p>
               </div>
@@ -240,17 +210,17 @@ const InventoryTable = () => {
                   onChange={(e) => setAdjustReason(e.target.value)}
                   required
                   placeholder="e.g. Manual restock, Damaged goods"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
                 />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setAdjustItem(null)}
-                  className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                  className="flex-1 border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
                   Cancel
                 </button>
                 <button type="submit" disabled={adjusting}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50">
+                  className="flex-1 bg-[#D8BFD8] text-gray-700 py-2 rounded-lg hover:bg-[#cbaecb] text-sm font-medium disabled:opacity-50">
                   {adjusting ? 'Saving...' : 'Update Stock'}
                 </button>
               </div>
@@ -258,7 +228,7 @@ const InventoryTable = () => {
           </div>
         </div>
       )}
-    </div>
+    </Layout>
   );
 };
 

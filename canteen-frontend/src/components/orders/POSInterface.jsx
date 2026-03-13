@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import api from '../../services/api';
+import Layout from '../common/Layout';
 import OrderReceipt from './OrderReceipt';
 
 const POSInterface = () => {
-  const { user, logout } = useAuth();
   const { cartItems, addToCart, removeFromCart, updateQuantity, clearCart, total } = useCart();
-  const navigate = useNavigate();
 
   const [items,          setItems]          = useState([]);
   const [categories,     setCategories]     = useState([]);
@@ -18,8 +15,6 @@ const POSInterface = () => {
   const [submitting,     setSubmitting]     = useState(false);
   const [receipt,        setReceipt]        = useState(null);
   const [error,          setError]          = useState('');
-
-  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,11 +53,6 @@ const POSInterface = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
   const filtered = items.filter((item) => {
     const matchSearch   = item.name.toLowerCase().includes(search.toLowerCase());
     const matchCategory = activeCategory === 'all' || item.category_id === Number(activeCategory);
@@ -71,54 +61,29 @@ const POSInterface = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading POS...</div>
-      </div>
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-xl text-gray-500">Loading POS...</div>
+        </div>
+      </Layout>
     );
   }
 
   if (receipt) {
-    return <OrderReceipt order={receipt} onNewOrder={() => setReceipt(null)} />;
+    return (
+      <Layout>
+        <OrderReceipt order={receipt} onNewOrder={() => setReceipt(null)} />
+      </Layout>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen POS</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">
-            {isAdmin ? '👑' : '💳'} {user?.name}
-          </span>
-          {isAdmin && (
-            <button onClick={() => navigate('/dashboard')}
-              className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-              Dashboard
-            </button>
-          )}
-          <button onClick={() => navigate('/menu')}
-            className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-            Menu
-          </button>
-          <button onClick={() => navigate('/inventory')}
-            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100">
-            Inventory
-          </button>
-          <button onClick={() => navigate('/orders')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-            Order Queue
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
-
-      <div className="flex flex-1 overflow-hidden">
+    <Layout>
+      <div className="flex h-screen overflow-hidden">
+        {/* Menu Items */}
         <div className="flex-1 p-6 overflow-y-auto">
+          <h1 className="text-2xl font-bold text-gray-800 mb-5">Point of Sale</h1>
+
           <div className="flex flex-wrap gap-3 mb-5">
             <input
               type="text"
@@ -152,11 +117,7 @@ const POSInterface = () => {
                 className="bg-white rounded-2xl shadow p-4 text-left hover:shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed">
                 <div className="bg-gray-100 rounded-xl h-24 flex items-center justify-center overflow-hidden mb-3">
                   {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={item.name}
-                      className="w-full h-full object-cover rounded-xl"
-                    />
+                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-xl" />
                   ) : (
                     <span className="text-3xl">🍴</span>
                   )}
@@ -170,7 +131,8 @@ const POSInterface = () => {
           </div>
         </div>
 
-        <div className="w-80 bg-white shadow-lg flex flex-col">
+        {/* Cart Panel */}
+        <div className="w-80 bg-white shadow-lg flex flex-col border-l border-gray-100">
           <div className="p-5 border-b">
             <h2 className="text-lg font-bold text-gray-800">🛒 Current Order</h2>
           </div>
@@ -195,23 +157,14 @@ const POSInterface = () => {
                     <p className="text-xs text-blue-600">₱{Number(item.price).toFixed(2)}</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-6 h-6 bg-gray-200 rounded-full text-sm font-bold hover:bg-gray-300">
-                      -
-                    </button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="w-6 h-6 bg-gray-200 rounded-full text-sm font-bold hover:bg-gray-300">-</button>
                     <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-6 h-6 bg-gray-200 rounded-full text-sm font-bold hover:bg-gray-300">
-                      +
-                    </button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="w-6 h-6 bg-gray-200 rounded-full text-sm font-bold hover:bg-gray-300">+</button>
                   </div>
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-red-400 hover:text-red-600 text-lg">
-                    ✕
-                  </button>
+                  <button onClick={() => removeFromCart(item.id)}
+                    className="text-red-400 hover:text-red-600 text-lg">✕</button>
                 </div>
               ))
             )}
@@ -219,15 +172,11 @@ const POSInterface = () => {
 
           <div className="p-5 border-t">
             {error && (
-              <div className="bg-red-50 text-red-600 text-xs rounded-lg px-3 py-2 mb-3">
-                {error}
-              </div>
+              <div className="bg-red-50 text-red-600 text-xs rounded-lg px-3 py-2 mb-3">{error}</div>
             )}
             <div className="flex justify-between items-center mb-4">
               <span className="text-gray-600 font-medium">Total</span>
-              <span className="text-2xl font-bold text-blue-600">
-                ₱{total.toFixed(2)}
-              </span>
+              <span className="text-2xl font-bold text-blue-600">₱{total.toFixed(2)}</span>
             </div>
             <button
               onClick={handleSubmitOrder}
@@ -236,8 +185,7 @@ const POSInterface = () => {
               {submitting ? 'Placing Order...' : 'Place Order'}
             </button>
             {cartItems.length > 0 && (
-              <button
-                onClick={clearCart}
+              <button onClick={clearCart}
                 className="w-full mt-2 text-sm text-red-400 hover:text-red-600">
                 Clear Cart
               </button>
@@ -245,7 +193,7 @@ const POSInterface = () => {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import Layout from '../common/Layout';
+import { SkeletonBlock, MenuCardSkeleton } from '../common/Skeleton';
 import MenuItemCard from './MenuItemCard';
 import MenuForm from './MenuForm';
 
 const MenuList = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [items,      setItems]      = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [search,     setSearch]     = useState('');
+  const isAdmin = user?.role === 'admin';
+
+  const [items,          setItems]          = useState([]);
+  const [categories,     setCategories]     = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [search,         setSearch]         = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [showForm,   setShowForm]   = useState(false);
-  const [editItem,   setEditItem]   = useState(null);
+  const [showForm,       setShowForm]       = useState(false);
+  const [editItem,       setEditItem]       = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -65,88 +67,68 @@ const MenuList = () => {
     setEditItem(null);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
   const filtered = items.filter((item) => {
     const matchSearch   = item.name.toLowerCase().includes(search.toLowerCase());
     const matchCategory = activeCategory === 'all' || item.category_id === Number(activeCategory);
     return matchSearch && matchCategory;
   });
 
+  const topbarActions = (
+    <>
+      {isAdmin && (
+        <button
+          onClick={() => { setEditItem(null); setShowForm(true); }}
+          className="bg-[#D8BFD8] text-gray-700 px-4 py-2 rounded-xl hover:bg-[#cbaecb] font-medium text-sm">
+          + Add Item
+        </button>
+      )}
+    </>
+  );
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading menu...</div>
-      </div>
+      <Layout title="Menu Management" actions={topbarActions}>
+        <div className="p-6">
+          <SkeletonBlock className="h-10 w-full mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => <MenuCardSkeleton key={i} />)}
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* Navbar */}
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen System</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/dashboard')}
-            className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-            Dashboard
-          </button>
-          <button onClick={() => navigate('/inventory')}
-            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100">
-            Inventory
-          </button>
-          <button onClick={() => navigate('/pos')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-            POS
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
-
+    <Layout title="Menu Management" actions={topbarActions}>
       <div className="p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Menu Management</h1>
-          <button
-            onClick={() => { setEditItem(null); setShowForm(true); }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-semibold text-sm"
-          >
-            + Add Item
-          </button>
-        </div>
 
-        {/* Search + Filter */}
         <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
           <input
             type="text"
             placeholder="Search menu items..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+            className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] w-64"
           />
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${activeCategory === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                activeCategory === 'all'
+                  ? 'bg-[#D8BFD8] text-gray-700'
+                  : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
+              }`}>
               All
             </button>
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${activeCategory === cat.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-              >
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                  activeCategory === cat.id
+                    ? 'bg-[#D8BFD8] text-gray-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
+                }`}>
                 {cat.name}
               </button>
             ))}
@@ -154,7 +136,6 @@ const MenuList = () => {
           <span className="ml-auto text-sm text-gray-400">{filtered.length} items</span>
         </div>
 
-        {/* Menu Grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-20 text-gray-400">No menu items found.</div>
         ) : (
@@ -163,16 +144,15 @@ const MenuList = () => {
               <MenuItemCard
                 key={item.id}
                 item={item}
-                onEdit={() => { setEditItem(item); setShowForm(true); }}
-                onDelete={() => handleDelete(item.id)}
-                onToggle={() => handleToggle(item.id)}
+                onEdit={isAdmin ? () => { setEditItem(item); setShowForm(true); } : null}
+                onDelete={isAdmin ? () => handleDelete(item.id) : null}
+                onToggle={isAdmin ? () => handleToggle(item.id) : null}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Add/Edit Modal */}
       {showForm && (
         <MenuForm
           item={editItem}
@@ -181,7 +161,7 @@ const MenuList = () => {
           onClose={() => { setShowForm(false); setEditItem(null); }}
         />
       )}
-    </div>
+    </Layout>
   );
 };
 

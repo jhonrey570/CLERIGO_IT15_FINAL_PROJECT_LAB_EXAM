@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import Layout from '../common/Layout';
 
 const STATUS_COLORS = {
   pending:   'bg-yellow-100 text-yellow-700',
@@ -18,14 +17,9 @@ const NEXT_STATUS = {
 };
 
 const OrderQueue = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
   const [orders,  setOrders]  = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter,  setFilter]  = useState('all');
-
-  const isAdmin = user?.role === 'admin';
 
   const fetchOrders = async () => {
     try {
@@ -53,61 +47,22 @@ const OrderQueue = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
   const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading orders...</div>
-      </div>
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-xl text-gray-500">Loading orders...</div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Order Queue</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">
-            {isAdmin ? '👑' : '💳'} {user?.name}
-          </span>
-          {isAdmin && (
-            <button onClick={() => navigate('/dashboard')}
-              className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-              Dashboard
-            </button>
-          )}
-          <button onClick={() => navigate('/pos')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-            POS
-          </button>
-          <button onClick={() => navigate('/menu')}
-            className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-            Menu
-          </button>
-          <button onClick={() => navigate('/inventory')}
-            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100">
-            Inventory
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
-
+    <Layout>
       <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Order Queue</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Order Queue</h1>
 
         <div className="bg-white rounded-2xl shadow p-4 mb-6 flex gap-2 flex-wrap">
           {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((s) => (
@@ -178,7 +133,7 @@ const OrderQueue = () => {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 };
 

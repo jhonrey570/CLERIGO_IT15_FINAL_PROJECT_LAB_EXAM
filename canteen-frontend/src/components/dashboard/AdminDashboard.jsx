@@ -1,161 +1,208 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import Layout from '../common/Layout';
+import { SkeletonBlock, SummaryCardSkeleton, ChartSkeleton } from '../common/Skeleton';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
   LineChart, Line
 } from 'recharts';
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+const COLORS = ['#D8BFD8', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [summary,       setSummary]       = useState(null);
-  const [weeklySales,   setWeeklySales]   = useState([]);
-  const [categoryData,  setCategoryData]  = useState([]);
-  const [orderVolume,   setOrderVolume]   = useState([]);
-  const [bestSellers,   setBestSellers]   = useState([]);
-  const [loading,       setLoading]       = useState(true);
+  const [summary,      setSummary]      = useState(null);
+  const [weeklySales,  setWeeklySales]  = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [orderVolume,  setOrderVolume]  = useState([]);
+  const [bestSellers,  setBestSellers]  = useState([]);
+  const [loading,      setLoading]      = useState(true);
+
+  const today         = new Date().toISOString().split('T')[0];
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+  const [startDate, setStartDate] = useState(thirtyDaysAgo);
+  const [endDate,   setEndDate]   = useState(today);
+
+  const fetchAll = async (start, end) => {
+    setLoading(true);
+    try {
+      const params = `?start_date=${start}&end_date=${end}`;
+      const [summaryRes, weeklyRes, categoryRes, volumeRes, bestRes] = await Promise.all([
+        api.get(`/reports/summary${params}`),
+        api.get(`/reports/weekly-sales${params}`),
+        api.get(`/reports/category-breakdown${params}`),
+        api.get(`/reports/order-volume${params}`),
+        api.get(`/reports/best-sellers${params}`),
+      ]);
+      setSummary(summaryRes.data);
+      setWeeklySales(weeklyRes.data);
+      setCategoryData(categoryRes.data);
+      setOrderVolume(volumeRes.data);
+      setBestSellers(bestRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [summaryRes, weeklyRes, categoryRes, volumeRes, bestRes] = await Promise.all([
-          api.get('/reports/summary'),
-          api.get('/reports/weekly-sales'),
-          api.get('/reports/category-breakdown'),
-          api.get('/reports/order-volume'),
-          api.get('/reports/best-sellers'),
-        ]);
-        setSummary(summaryRes.data);
-        setWeeklySales(weeklyRes.data);
-        setCategoryData(categoryRes.data);
-        setOrderVolume(volumeRes.data);
-        setBestSellers(bestRes.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
+    fetchAll(startDate, endDate);
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+  const handleApplyFilter = () => fetchAll(startDate, endDate);
+
+  const handleExportCSV = () => {
+    const rows = [
+      ['Date', 'Total Sales (₱)'],
+      ...weeklySales.map((row) => [row.date, row.total]),
+      [],
+      ['Summary'],
+      ['Total Sales', summary?.total_sales],
+      ['Total Orders', summary?.total_orders],
+      ['Average Order Value', summary?.average_order],
+      [],
+      ['Best Sellers'],
+      ['Item', 'Qty Sold', 'Revenue (₱)'],
+      ...bestSellers.slice(0, 5).map((item) => [
+        item.menu_item?.name,
+        item.total_qty,
+        item.total_revenue,
+      ]),
+      [],
+      ['Category Breakdown'],
+      ['Category', 'Revenue (₱)'],
+      ...categoryData.map((cat) => [cat.category, cat.total_revenue]),
+    ];
+
+    const csvContent = rows.map((r) => r.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `canteen-report-${startDate}-to-${endDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
+
+  const topbarActions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5">
+        <label className="text-xs text-gray-500">From</label>
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="text-xs border-none outline-none bg-transparent text-gray-700 w-28"
+        />
+        <label className="text-xs text-gray-500">To</label>
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          className="text-xs border-none outline-none bg-transparent text-gray-700 w-28"
+        />
+      </div>
+      <button
+        onClick={handleApplyFilter}
+        className="bg-[#D8BFD8] text-gray-700 text-xs px-3 py-1.5 rounded-xl hover:bg-[#cbaecb] font-medium">
+        Apply Filter
+      </button>
+      <button
+        onClick={handleExportCSV}
+        className="bg-[#D8BFD8] text-gray-700 text-xs px-3 py-1.5 rounded-xl hover:bg-[#cbaecb] font-medium">
+        Export CSV
+      </button>
+    </div>
+  );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading dashboard...</div>
-      </div>
+      <Layout title="Sales Dashboard" actions={topbarActions}>
+        <div className="p-4 md:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+            <SummaryCardSkeleton />
+            <SummaryCardSkeleton />
+            <SummaryCardSkeleton />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* Navbar */}
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen System</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">👑 {user?.name}</span>
-          <button
-            onClick={() => navigate('/menu')}
-            className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100"
-          >
-            Menu
-          </button>
-          <button
-            onClick={() => navigate('/inventory')}
-            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100"
-          >
-            Inventory
-          </button>
-          <button
-            onClick={() => navigate('/pos')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100"
-          >
-            POS
-          </button>
-          <button
-            onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Sales Dashboard</h1>
+    <Layout title="Sales Dashboard" actions={topbarActions}>
+      <div className="p-4 md:p-6">
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
             <p className="text-sm text-gray-500">Total Sales</p>
-            <p className="text-3xl font-bold text-blue-600 mt-1">
+            <p className="text-2xl md:text-3xl font-bold text-gray-800 mt-1">
               ₱{Number(summary?.total_sales || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
             </p>
+            <p className="text-xs text-gray-400 mt-1">{startDate} to {endDate}</p>
           </div>
-          <div className="bg-white rounded-2xl shadow p-6">
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
             <p className="text-sm text-gray-500">Total Orders</p>
-            <p className="text-3xl font-bold text-green-600 mt-1">
+            <p className="text-2xl md:text-3xl font-bold text-gray-800 mt-1">
               {summary?.total_orders || 0}
             </p>
+            <p className="text-xs text-gray-400 mt-1">{startDate} to {endDate}</p>
           </div>
-          <div className="bg-white rounded-2xl shadow p-6">
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
             <p className="text-sm text-gray-500">Average Order Value</p>
-            <p className="text-3xl font-bold text-purple-600 mt-1">
+            <p className="text-2xl md:text-3xl font-bold text-gray-800 mt-1">
               ₱{Number(summary?.average_order || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
             </p>
+            <p className="text-xs text-gray-400 mt-1">{startDate} to {endDate}</p>
           </div>
         </div>
 
         {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-          {/* Weekly Sales Bar Chart */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">Weekly Sales Revenue</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
+            <h2 className="text-sm md:text-base font-semibold text-gray-700 mb-4">Sales Revenue</h2>
             {weeklySales.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={weeklySales}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip formatter={(val) => `₱${val}`} />
-                  <Bar dataKey="total" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="total" fill="#D8BFD8" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-48 text-gray-400">
-                No completed orders yet
+              <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
+                No completed orders in this period
               </div>
             )}
           </div>
 
-          {/* Category Pie Chart */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">Sales by Category</h2>
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
+            <h2 className="text-sm md:text-base font-semibold text-gray-700 mb-4">Sales by Category</h2>
             {categoryData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie
                     data={categoryData}
                     dataKey="total_revenue"
                     nameKey="category"
                     cx="50%" cy="50%"
-                    outerRadius={80}
+                    outerRadius={75}
                     label={({ category, percent }) =>
                       `${category} ${(percent * 100).toFixed(0)}%`
                     }
@@ -168,7 +215,7 @@ const AdminDashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-48 text-gray-400">
+              <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                 No data available
               </div>
             )}
@@ -176,57 +223,53 @@ const AdminDashboard = () => {
         </div>
 
         {/* Charts Row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Order Volume Line Chart */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">Order Volume (Last 30 Days)</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
+            <h2 className="text-sm md:text-base font-semibold text-gray-700 mb-4">Order Volume Trend</h2>
             {orderVolume.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={orderVolume}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="total_orders" stroke="#10B981" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="total_orders" stroke="#D8BFD8" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-48 text-gray-400">
+              <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                 No data available
               </div>
             )}
           </div>
 
-          {/* Best Sellers */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">🏆 Top 5 Best Sellers</h2>
+          <div className="bg-white rounded-2xl shadow p-5 md:p-6">
+            <h2 className="text-sm md:text-base font-semibold text-gray-700 mb-4">🏆 Top 5 Best Sellers</h2>
             {bestSellers.length > 0 ? (
               <div className="space-y-3">
                 {bestSellers.slice(0, 5).map((item, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-gray-400">#{index + 1}</span>
+                      <span className="text-base font-bold text-gray-300">#{index + 1}</span>
                       <span className="text-sm text-gray-700">{item.menu_item?.name}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-blue-600">{item.total_qty} sold</p>
+                      <p className="text-sm font-semibold text-gray-700">{item.total_qty} sold</p>
                       <p className="text-xs text-gray-400">₱{Number(item.total_revenue).toLocaleString()}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex items-center justify-center h-48 text-gray-400">
+              <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                 No data available
               </div>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
 export default AdminDashboard;
-

@@ -1,7 +1,7 @@
- import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import Layout from '../common/Layout';
 
 const ROLE_COLORS = {
   admin:    'bg-purple-100 text-purple-700',
@@ -10,8 +10,7 @@ const ROLE_COLORS = {
 };
 
 const UserManagement = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [users,    setUsers]    = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -88,51 +87,18 @@ const UserManagement = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading users...</div>
-      </div>
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-xl text-gray-500">Loading users...</div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen System</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">👑 {user?.name}</span>
-          <button onClick={() => navigate('/dashboard')}
-            className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-            Dashboard
-          </button>
-          <button onClick={() => navigate('/menu')}
-            className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-            Menu
-          </button>
-          <button onClick={() => navigate('/inventory')}
-            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100">
-            Inventory
-          </button>
-          <button onClick={() => navigate('/pos')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-            POS
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
-
+    <Layout>
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
@@ -254,7 +220,7 @@ const UserManagement = () => {
           </div>
         </div>
       )}
-    </div>
+    </Layout>
   );
 };
 

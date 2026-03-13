@@ -1,17 +1,15 @@
- import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import Layout from '../common/Layout';
+import { SkeletonBlock, TableRowSkeleton } from '../common/Skeleton';
 
 const InventoryLogs = () => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [logs,    setLogs]    = useState([]);
   const [loading, setLoading] = useState(true);
   const [search,  setSearch]  = useState('');
-
-  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchLogs();
@@ -28,86 +26,58 @@ const InventoryLogs = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
   const filtered = logs.filter((log) =>
     log.menu_item?.name.toLowerCase().includes(search.toLowerCase()) ||
     log.reason?.toLowerCase().includes(search.toLowerCase()) ||
     log.user?.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const topbarActions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <input
+        type="text"
+        placeholder="Search by item, reason or user..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="border border-gray-200 rounded-xl px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] w-48 md:w-64"
+      />
+      <button
+        onClick={() => navigate('/inventory')}
+        className="bg-[#D8BFD8] text-gray-700 text-sm px-4 py-1.5 rounded-xl hover:bg-[#cbaecb] font-medium whitespace-nowrap">
+        ← Back to Inventory
+      </button>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading inventory logs...</div>
-      </div>
+      <Layout title="Inventory Logs" actions={topbarActions}>
+        <div className="p-4 md:p-6">
+          <SkeletonBlock className="h-10 w-full mb-6" />
+          <div className="bg-white rounded-2xl shadow overflow-hidden">
+            <table className="w-full min-w-[600px]">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  {['Item', 'Change', 'Reason', 'By', 'Date & Time'].map((h) => (
+                    <th key={h} className="px-6 py-4 text-left text-sm font-semibold text-gray-600">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {Array.from({ length: 8 }).map((_, i) => <TableRowSkeleton key={i} cols={5} />)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen System</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">
-            {isAdmin ? '👑' : '💳'} {user?.name}
-          </span>
-          {isAdmin && (
-            <button onClick={() => navigate('/dashboard')}
-              className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-              Dashboard
-            </button>
-          )}
-          <button onClick={() => navigate('/inventory')}
-            className="text-sm bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100">
-            Inventory
-          </button>
-          <button onClick={() => navigate('/menu')}
-            className="text-sm bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-            Menu
-          </button>
-          <button onClick={() => navigate('/pos')}
-            className="text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-            POS
-          </button>
-          <button onClick={() => navigate('/orders')}
-            className="text-sm bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg hover:bg-yellow-100">
-            Order Queue
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
-
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Inventory Logs</h1>
-          <button onClick={() => navigate('/inventory')}
-            className="text-sm bg-white border border-gray-300 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50">
-            ← Back to Inventory
-          </button>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow p-4 mb-6">
-          <input
-            type="text"
-            placeholder="Search by item, reason or user..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-72"
-          />
-        </div>
-
-        <div className="bg-white rounded-2xl shadow overflow-hidden">
-          <table className="w-full text-sm">
+    <Layout title="Inventory Logs" actions={topbarActions}>
+      <div className="p-4 md:p-6">
+        <div className="bg-white rounded-2xl shadow overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-6 py-4 text-gray-600 font-semibold">Item</th>
@@ -141,7 +111,7 @@ const InventoryLogs = () => {
                     </td>
                     <td className="px-6 py-4 text-gray-500">{log.reason}</td>
                     <td className="px-6 py-4 text-gray-500">{log.user?.name}</td>
-                    <td className="px-6 py-4 text-gray-400">
+                    <td className="px-6 py-4 text-gray-400 whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString()}
                     </td>
                   </tr>
@@ -151,7 +121,7 @@ const InventoryLogs = () => {
           </table>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
