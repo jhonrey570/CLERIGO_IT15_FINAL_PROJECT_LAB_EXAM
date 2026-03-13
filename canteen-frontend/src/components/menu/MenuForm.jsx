@@ -1,4 +1,4 @@
- import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../services/api';
 
 const MenuForm = ({ item, categories, onSaved, onClose }) => {
@@ -13,6 +13,8 @@ const MenuForm = ({ item, categories, onSaved, onClose }) => {
     category_id:         '',
     is_available:        true,
   });
+  const [image,   setImage]   = useState(null);
+  const [preview, setPreview] = useState(null);
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +29,9 @@ const MenuForm = ({ item, categories, onSaved, onClose }) => {
         category_id:         item.category_id,
         is_available:        item.is_available,
       });
+      if (item.image_url) {
+        setPreview(item.image_url);
+      }
     }
   }, [item]);
 
@@ -35,16 +40,39 @@ const MenuForm = ({ item, categories, onSaved, onClose }) => {
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
+      const formData = new FormData();
+      Object.keys(form).forEach((key) => {
+        formData.append(key, form[key]);
+      });
+      if (image) {
+        formData.append('image', image);
+      }
+      if (isEdit) {
+        formData.append('_method', 'PUT');
+      }
+
       let res;
       if (isEdit) {
-        res = await api.put(`/menu-items/${item.id}`, form);
+        res = await api.post(`/menu-items/${item.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       } else {
-        res = await api.post('/menu-items', form);
+        res = await api.post('/menu-items', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       }
       onSaved(res.data, isEdit);
     } catch (err) {
@@ -56,7 +84,7 @@ const MenuForm = ({ item, categories, onSaved, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold text-gray-800">
             {isEdit ? 'Edit Menu Item' : 'Add Menu Item'}
@@ -109,6 +137,28 @@ const MenuForm = ({ item, categories, onSaved, onClose }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Low Stock Alert</label>
               <input name="low_stock_threshold" type="number" value={form.low_stock_threshold} onChange={handleChange} min="0"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Item Image</label>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
+                {preview ? (
+                  <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">🍴</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/gif"
+                  onChange={handleImageChange}
+                  className="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
+                />
+                <p className="text-xs text-gray-400 mt-1">JPEG, PNG, JPG or GIF — max 2MB</p>
+              </div>
             </div>
           </div>
 

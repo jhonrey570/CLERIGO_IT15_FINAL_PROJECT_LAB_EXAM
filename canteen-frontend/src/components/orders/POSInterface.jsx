@@ -150,8 +150,16 @@ const POSInterface = () => {
                 onClick={() => addToCart(item)}
                 disabled={item.stock_qty === 0}
                 className="bg-white rounded-2xl shadow p-4 text-left hover:shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed">
-                <div className="bg-gray-100 rounded-xl h-24 flex items-center justify-center text-3xl mb-3">
-                  🍴
+                <div className="bg-gray-100 rounded-xl h-24 flex items-center justify-center overflow-hidden mb-3">
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover rounded-xl"
+                    />
+                  ) : (
+                    <span className="text-3xl">🍴</span>
+                  )}
                 </div>
                 <p className="text-sm font-semibold text-gray-800 line-clamp-1">{item.name}</p>
                 <p className="text-xs text-gray-400 mb-1">{item.category?.name}</p>
@@ -175,6 +183,13 @@ const POSInterface = () => {
             ) : (
               cartItems.map((item) => (
                 <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-lg">🍴</span>
+                    )}
+                  </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-800">{item.name}</p>
                     <p className="text-xs text-blue-600">₱{Number(item.price).toFixed(2)}</p>
