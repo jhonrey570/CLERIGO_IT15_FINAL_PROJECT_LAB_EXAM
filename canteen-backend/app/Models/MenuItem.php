@@ -9,8 +9,18 @@ class MenuItem extends Model
     protected $fillable = [
         'category_id', 'name', 'description',
         'price', 'stock_qty', 'low_stock_threshold',
-        'image_path', 'is_available'
+        'image', 'is_available'
     ];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            return asset('storage/' . $this->image);
+        }
+        return null;
+    }
 
     public function category()
     {

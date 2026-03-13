@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\MenuItem;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -36,9 +37,17 @@ class MenuController extends Controller
             'stock_qty'           => 'integer|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_available'        => 'boolean',
+            'image'               => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $item = MenuItem::create($request->all());
+        $data = $request->except('image');
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('menu_items', 'public');
+            $data['image'] = $path;
+        }
+
+        $item = MenuItem::create($data);
 
         return response()->json($item->load('category'), 201);
     }
@@ -58,15 +67,30 @@ class MenuController extends Controller
             'stock_qty'           => 'integer|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_available'        => 'boolean',
+            'image'               => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $menuItem->update($request->all());
+        $data = $request->except('image');
+
+        if ($request->hasFile('image')) {
+            if ($menuItem->image) {
+                Storage::disk('public')->delete($menuItem->image);
+            }
+            $path = $request->file('image')->store('menu_items', 'public');
+            $data['image'] = $path;
+        }
+
+        $menuItem->update($data);
 
         return response()->json($menuItem->load('category'));
     }
 
     public function destroy(MenuItem $menuItem)
     {
+        if ($menuItem->image) {
+            Storage::disk('public')->delete($menuItem->image);
+        }
+
         $menuItem->delete();
 
         return response()->json(['message' => 'Menu item deleted successfully.']);
