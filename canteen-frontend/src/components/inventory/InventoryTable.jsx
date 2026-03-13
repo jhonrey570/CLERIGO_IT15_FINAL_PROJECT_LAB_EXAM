@@ -104,6 +104,10 @@ const InventoryTable = () => {
             className="text-sm bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg hover:bg-yellow-100">
             Order Queue
           </button>
+          <button onClick={() => navigate('/inventory/logs')}
+            className="text-sm bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-100">
+            View Logs
+          </button>
           <button onClick={handleLogout}
             className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
             Logout

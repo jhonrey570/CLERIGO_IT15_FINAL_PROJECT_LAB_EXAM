@@ -8,6 +8,7 @@ import MenuList from './components/menu/MenuList';
 import POSInterface from './components/orders/POSInterface';
 import OrderQueue from './components/orders/OrderQueue';
 import InventoryTable from './components/inventory/InventoryTable';
+import InventoryLogs from './components/inventory/InventoryLogs';
 import MyOrders from './components/orders/MyOrders';
 import UserManagement from './components/users/UserManagement';
 import CustomerMenu from './components/customer/CustomerMenu';
@@ -48,6 +49,11 @@ function AppRoutes() {
       <Route path="/inventory" element={
         <ProtectedRoute allowedRoles={['admin', 'cashier']}>
           <InventoryTable />
+        </ProtectedRoute>
+      } />
+      <Route path="/inventory/logs" element={
+        <ProtectedRoute allowedRoles={['admin', 'cashier']}>
+          <InventoryLogs />
         </ProtectedRoute>
       } />
       <Route path="/users" element={
