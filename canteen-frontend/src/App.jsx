@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import MenuList from './components/menu/MenuList';
@@ -28,13 +29,14 @@ function AppRoutes() {
     if (!user) return '/login';
     if (user.role === 'admin') return '/dashboard';
     if (user.role === 'cashier') return '/pos';
-    if (user.role === 'customer') return '/my-orders';
+    if (user.role === 'customer') return '/customer-menu';
     return '/login';
   };
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <Login /> : <Navigate to={defaultRedirect()} />} />
+      <Route path="/login"    element={!user ? <Login />    : <Navigate to={defaultRedirect()} />} />
+      <Route path="/register" element={!user ? <Register /> : <Navigate to={defaultRedirect()} />} />
 
       <Route path="/dashboard" element={
         <ProtectedRoute allowedRoles={['admin']}>

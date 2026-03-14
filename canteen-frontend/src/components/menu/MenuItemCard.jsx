@@ -26,7 +26,7 @@ const MenuItemCard = ({ item, onEdit, onDelete, onToggle }) => {
         </div>
         <p className="text-xs text-gray-400 mb-1">{item.category?.name}</p>
         <p className="text-xs text-gray-500 mb-2 line-clamp-2">{item.description}</p>
-        <p className="text-lg font-bold text-blue-600">
+        <p className="text-lg font-bold text-gray-800">
           ₱{Number(item.price).toFixed(2)}
         </p>
         <p className="text-xs text-gray-400 mt-1">Stock: {item.stock_qty}</p>
@@ -36,7 +36,7 @@ const MenuItemCard = ({ item, onEdit, onDelete, onToggle }) => {
         <div className="flex gap-2 mt-3">
           <button
             onClick={onEdit}
-            className="flex-1 text-xs bg-blue-50 text-blue-600 py-1.5 rounded-lg hover:bg-blue-100 font-medium">
+            className="flex-1 text-xs bg-[#D8BFD8] text-gray-700 py-1.5 rounded-lg hover:bg-[#cbaecb] font-medium">
             Edit
           </button>
           <button

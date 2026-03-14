@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Layout from '../common/Layout';
 import { SkeletonBlock, TableRowSkeleton } from '../common/Skeleton';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 
 const ROLE_COLORS = {
   admin:    'bg-purple-100 text-purple-700',
@@ -14,13 +14,14 @@ const ROLE_COLORS = {
 const UserManagement = () => {
   const { user } = useAuth();
 
-  const [users,    setUsers]    = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editUser, setEditUser] = useState(null);
-  const [error,    setError]    = useState('');
-  const [success,  setSuccess]  = useState('');
-  const [search,   setSearch]   = useState('');
+  const [users,        setUsers]        = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [showForm,     setShowForm]     = useState(false);
+  const [editUser,     setEditUser]     = useState(null);
+  const [error,        setError]        = useState('');
+  const [success,      setSuccess]      = useState('');
+  const [search,       setSearch]       = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: '', email: '', password: '', role: 'customer',
@@ -60,6 +61,7 @@ const UserManagement = () => {
       }
       setShowForm(false);
       setEditUser(null);
+      setShowPassword(false);
       setForm({ name: '', email: '', password: '', role: 'customer' });
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -71,6 +73,7 @@ const UserManagement = () => {
     setEditUser(u);
     setForm({ name: u.name, email: u.email, password: '', role: u.role });
     setShowForm(true);
+    setShowPassword(false);
     setError('');
   };
 
@@ -90,6 +93,13 @@ const UserManagement = () => {
     }
   };
 
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditUser(null);
+    setShowPassword(false);
+    setError('');
+  };
+
   const filtered = users.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -98,7 +108,7 @@ const UserManagement = () => {
 
   const topbarActions = (
     <button
-      onClick={() => { setEditUser(null); setForm({ name: '', email: '', password: '', role: 'customer' }); setShowForm(true); setError(''); }}
+      onClick={() => { setEditUser(null); setForm({ name: '', email: '', password: '', role: 'customer' }); setShowPassword(false); setShowForm(true); setError(''); }}
       className="bg-[#D8BFD8] text-gray-700 px-4 py-2 rounded-xl hover:bg-[#cbaecb] font-medium text-sm">
       + Add User
     </button>
@@ -214,7 +224,7 @@ const UserManagement = () => {
               <h2 className="text-lg font-bold text-gray-800">
                 {editUser ? 'Edit User' : 'Add User'}
               </h2>
-              <button onClick={() => { setShowForm(false); setEditUser(null); }}
+              <button onClick={handleCloseForm}
                 className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
 
@@ -240,9 +250,22 @@ const UserManagement = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password {editUser && <span className="text-gray-400 font-normal">(leave blank to keep current)</span>}
                 </label>
-                <input name="password" type="password" value={form.password} onChange={handleChange}
-                  required={!editUser}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]" />
+                <div className="relative">
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.password}
+                    onChange={handleChange}
+                    required={!editUser}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -254,7 +277,7 @@ const UserManagement = () => {
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => { setShowForm(false); setEditUser(null); }}
+                <button type="button" onClick={handleCloseForm}
                   className="flex-1 border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
                   Cancel
                 </button>
