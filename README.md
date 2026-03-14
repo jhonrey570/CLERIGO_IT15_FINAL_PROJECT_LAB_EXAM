@@ -78,3 +78,11 @@ Table, Description
 4. orders — Customer orders with status tracking
 5. order_items — Line items linking orders to menu items
 6. inventory_logs — Stock change history with reasons
+
+ORDER STATUS FLOW
+Pending → Preparing → Ready → Completed
+                            ↘ Cancelled
+
+ROLE PERMISSIONS
+
+Feature    Admin    Cashier    Customer
