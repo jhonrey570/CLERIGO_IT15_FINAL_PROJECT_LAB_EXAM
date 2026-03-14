@@ -283,3 +283,7 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+//In case ma wala: 
+//Email: admin@canteen.com
+//Pass: password
