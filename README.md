@@ -1,5 +1,4 @@
-CANTEEN MANAGEMENT SYSTEM
-
+1.1. CANTEEN MANAGEMENT SYSTEM
 
 1. IT15/L Integrative Programming — Final Project / Lab Exam
 2. Student: Clerigo, Cortez, Salubre, Tulabing
@@ -7,7 +6,7 @@ CANTEEN MANAGEMENT SYSTEM
 
 
 
-PROJECT STRUCTURE
+1.2. PROJECT STRUCTURE
 
 Overall structure
 1. canteen-backend — Laravel RESTful API
@@ -15,7 +14,7 @@ Overall structure
 
 
 
-XAMPP
+1.3 XAMPP
 
 For testing
 1. Open XAMPP control panel
@@ -24,7 +23,7 @@ For testing
 
 
 
-BACKEND SETUP (Laravel)
+1.4 BACKEND SETUP (Laravel)
 
 bash
 1. cd canteen-backend
@@ -36,7 +35,7 @@ bash
 
 
 
-FRONTEND SETUP (React)
+1.5 FRONTEND SETUP (React)
 
 bash
 1. cd canteen-frontend
@@ -46,7 +45,7 @@ bash
 
 
 
-DEFAULT USER ACCOUNTS (After seeding)
+1.6 DEFAULT USER ACCOUNTS (After seeding)
 
 Role/Temporary names, Email, Password
 1. Admin admin@canteen.com password
@@ -55,7 +54,7 @@ Role/Temporary names, Email, Password
 
 
    
-GITHUB PUSHING
+1.7 GITHUB PUSHING
 
 1. git add .
 2. git commit -m "initial: setup repo structure and README"
@@ -63,7 +62,7 @@ GITHUB PUSHING
 
 
 
-FEATURES
+1.8 FEATURES
 
 1. Role-based authentication (Admin, Cashier, Customer)
 2. Menu management with image upload and category filtering
@@ -75,7 +74,7 @@ FEATURES
 
 
 
-TECHNOLOGIES USED
+1.9 TECHNOLOGIES USED
 
 1. Frontend — React.js, Tailwind CSS, Recharts
 2. Backend — Laravel, PHP
@@ -85,7 +84,7 @@ TECHNOLOGIES USED
 
 
 
-API ENDPOINTS SUMMARY
+2.1 API ENDPOINTS SUMMARY
 
 Method, Endpoint, Description
 1. POST — /api/login — Login and get token
@@ -101,7 +100,7 @@ Method, Endpoint, Description
 
 
 
-DATABASE TABLES
+2.2 DATABASE TABLES
 
 Table, Description
 1. users — Stores admin, cashier, and customer accounts
@@ -113,13 +112,13 @@ Table, Description
 
 
 
-ORDER STATUS FLOW
+2.3 ORDER STATUS FLOW
 
 Pending → Preparing → Ready → Completed
                             ↘ Cancelled
 
 
 
-ROLE PERMISSIONS
+2.4 ROLE PERMISSIONS
 
 Feature    Admin    Cashier    Customer
