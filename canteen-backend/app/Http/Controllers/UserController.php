@@ -40,12 +40,19 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name'  => 'sometimes|string|max:100',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
-            'role'  => 'sometimes|in:admin,cashier,customer',
+            'name'     => 'sometimes|string|max:100',
+            'email'    => 'sometimes|email|unique:users,email,' . $user->id,
+            'role'     => 'sometimes|in:admin,cashier,customer',
+            'password' => 'sometimes|nullable|min:6',
         ]);
 
-        $user->update($request->only('name', 'email', 'role'));
+        $data = $request->only('name', 'email', 'role');
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
 
         return response()->json($user);
     }

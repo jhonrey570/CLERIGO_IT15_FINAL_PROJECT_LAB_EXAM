@@ -19,11 +19,17 @@ class ReportController extends Controller
         return response()->json(['date' => today(), 'total' => $total]);
     }
 
-    public function weeklySales()
+    public function weeklySales(Request $request)
     {
-        $sales = Order::where('status', 'completed')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+        $query = Order::where('status', 'completed');
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        } else {
+            $query->where('created_at', '>=', now()->subDays(7));
+        }
+
+        $sales = $query->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -31,11 +37,17 @@ class ReportController extends Controller
         return response()->json($sales);
     }
 
-    public function monthlySales()
+    public function monthlySales(Request $request)
     {
-        $sales = Order::where('status', 'completed')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+        $query = Order::where('status', 'completed');
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        } else {
+            $query->where('created_at', '>=', now()->subDays(30));
+        }
+
+        $sales = $query->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -43,10 +55,17 @@ class ReportController extends Controller
         return response()->json($sales);
     }
 
-    public function bestSellers()
+    public function bestSellers(Request $request)
     {
-        $items = OrderItem::with('menuItem')
-            ->selectRaw('menu_item_id, SUM(quantity) as total_qty, SUM(subtotal) as total_revenue')
+        $query = OrderItem::with('menuItem');
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereHas('order', function ($q) use ($request) {
+                $q->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+            });
+        }
+
+        $items = $query->selectRaw('menu_item_id, SUM(quantity) as total_qty, SUM(subtotal) as total_revenue')
             ->groupBy('menu_item_id')
             ->orderBy('total_qty', 'desc')
             ->limit(10)
@@ -57,10 +76,16 @@ class ReportController extends Controller
 
     public function orderVolume(Request $request)
     {
-        $days = $request->get('days', 30);
+        $query = Order::query();
 
-        $volume = Order::where('created_at', '>=', now()->subDays($days))
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as total_orders')
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        } else {
+            $days = $request->get('days', 30);
+            $query->where('created_at', '>=', now()->subDays($days));
+        }
+
+        $volume = $query->selectRaw('DATE(created_at) as date, COUNT(*) as total_orders')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -68,11 +93,18 @@ class ReportController extends Controller
         return response()->json($volume);
     }
 
-    public function categoryBreakdown()
+    public function categoryBreakdown(Request $request)
     {
-        $breakdown = OrderItem::join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
-            ->selectRaw('categories.name as category, SUM(order_items.subtotal) as total_revenue')
+        $query = OrderItem::join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->join('categories', 'menu_items.category_id', '=', 'categories.id');
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereHas('order', function ($q) use ($request) {
+                $q->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+            });
+        }
+
+        $breakdown = $query->selectRaw('categories.name as category, SUM(order_items.subtotal) as total_revenue')
             ->groupBy('categories.name')
             ->orderBy('total_revenue', 'desc')
             ->get();
@@ -80,10 +112,16 @@ class ReportController extends Controller
         return response()->json($breakdown);
     }
 
-    public function summary()
+    public function summary(Request $request)
     {
-        $totalSales  = Order::where('status', 'completed')->sum('total_amount');
-        $totalOrders = Order::count();
+        $query = Order::where('status', 'completed');
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        }
+
+        $totalSales  = $query->sum('total_amount');
+        $totalOrders = $query->count();
         $avgOrder    = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
 
         return response()->json([
