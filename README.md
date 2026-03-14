@@ -121,12 +121,12 @@ Pending → Preparing → Ready → Completed
 
 2.4. ROLE PERMISSIONS
 
-Feature                     Admin    Cashier    Customer
-1. View Menu                Yes      Yes        Yes
-2. Manage Menu
-3. Place Orders
-4. Update Order Status
-5. View Inventory
-6. Adjust Stock
-7. View Reports
-8. Manage Users
+Feature, Admin, Cashier, Customer
+1. View Menu — Yes, Yes, Yes
+2. Manage Menu — Yes, No, No
+3. Place Orders — Yes, Yes, Yes
+4. Update Order Status — Yes, Yes, No
+5. View Inventory — Yes, Yes, No
+6. Adjust Stock — Yes, Yes, No
+7. View Reports — Yes, No, No
+8. Manage Users — Yes, No, No
