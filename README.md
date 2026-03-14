@@ -14,7 +14,7 @@ Overall structure
 
 
 
-1.3 XAMPP
+1.3. XAMPP
 
 For testing
 1. Open XAMPP control panel
@@ -23,7 +23,7 @@ For testing
 
 
 
-1.4 BACKEND SETUP (Laravel)
+1.4. BACKEND SETUP (Laravel)
 
 bash
 1. cd canteen-backend
@@ -35,7 +35,7 @@ bash
 
 
 
-1.5 FRONTEND SETUP (React)
+1.5. FRONTEND SETUP (React)
 
 bash
 1. cd canteen-frontend
@@ -45,7 +45,7 @@ bash
 
 
 
-1.6 DEFAULT USER ACCOUNTS (After seeding)
+1.6. DEFAULT USER ACCOUNTS (After seeding)
 
 Role/Temporary names, Email, Password
 1. Admin admin@canteen.com password
@@ -54,7 +54,7 @@ Role/Temporary names, Email, Password
 
 
    
-1.7 GITHUB PUSHING
+1.7. GITHUB PUSHING
 
 1. git add .
 2. git commit -m "initial: setup repo structure and README"
@@ -62,7 +62,7 @@ Role/Temporary names, Email, Password
 
 
 
-1.8 FEATURES
+1.8. FEATURES
 
 1. Role-based authentication (Admin, Cashier, Customer)
 2. Menu management with image upload and category filtering
@@ -74,7 +74,7 @@ Role/Temporary names, Email, Password
 
 
 
-1.9 TECHNOLOGIES USED
+1.9. TECHNOLOGIES USED
 
 1. Frontend — React.js, Tailwind CSS, Recharts
 2. Backend — Laravel, PHP
@@ -84,7 +84,7 @@ Role/Temporary names, Email, Password
 
 
 
-2.1 API ENDPOINTS SUMMARY
+2.1. API ENDPOINTS SUMMARY
 
 Method, Endpoint, Description
 1. POST — /api/login — Login and get token
@@ -100,7 +100,7 @@ Method, Endpoint, Description
 
 
 
-2.2 DATABASE TABLES
+2.2. DATABASE TABLES
 
 Table, Description
 1. users — Stores admin, cashier, and customer accounts
@@ -112,13 +112,21 @@ Table, Description
 
 
 
-2.3 ORDER STATUS FLOW
+2.3. ORDER STATUS FLOW
 
 Pending → Preparing → Ready → Completed
                             ↘ Cancelled
 
 
 
-2.4 ROLE PERMISSIONS
+2.4. ROLE PERMISSIONS
 
-Feature    Admin    Cashier    Customer
+Feature                     Admin    Cashier    Customer
+1. View Menu                Yes      Yes        Yes
+2. Manage Menu
+3. Place Orders
+4. Update Order Status
+5. View Inventory
+6. Adjust Stock
+7. View Reports
+8. Manage Users
