@@ -70,3 +70,5 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 }
+
+//Final set in the backend btw. That is all good for now.
