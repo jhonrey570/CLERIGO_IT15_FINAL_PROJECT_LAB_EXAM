@@ -28,18 +28,25 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const params = `?start_date=${start}&end_date=${end}`;
-      const [summaryRes, weeklyRes, categoryRes, volumeRes, bestRes] = await Promise.all([
+      const [summaryRes, weeklyRes, categoryRes, volumeRes, bestRes] = await Promise.allSettled([
         api.get(`/reports/summary${params}`),
         api.get(`/reports/weekly-sales${params}`),
         api.get(`/reports/category-breakdown${params}`),
         api.get(`/reports/order-volume${params}`),
         api.get(`/reports/best-sellers${params}`),
       ]);
-      setSummary(summaryRes.data);
-      setWeeklySales(weeklyRes.data);
-      setCategoryData(categoryRes.data);
-      setOrderVolume(volumeRes.data);
-      setBestSellers(bestRes.data);
+
+      if (summaryRes.status  === 'fulfilled') setSummary(summaryRes.value.data);
+      if (weeklyRes.status   === 'fulfilled') setWeeklySales(weeklyRes.value.data);
+      if (categoryRes.status === 'fulfilled') setCategoryData(
+        categoryRes.value.data.map((item) => ({
+          ...item,
+          total_revenue: parseFloat(item.total_revenue),
+        }))
+      );
+      if (volumeRes.status === 'fulfilled') setOrderVolume(volumeRes.value.data);
+      if (bestRes.status   === 'fulfilled') setBestSellers(bestRes.value.data);
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -152,7 +159,6 @@ const AdminDashboard = () => {
 
         <FilterBar />
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <div className="bg-white rounded-2xl shadow p-5 md:p-6">
             <p className="text-sm text-gray-500">Total Sales</p>
@@ -177,7 +183,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Charts Row 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
           <div className="bg-white rounded-2xl shadow p-5 md:p-6">
             <h2 className="text-sm md:text-base font-semibold text-gray-700 mb-4">Sales Revenue</h2>
@@ -228,7 +233,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Charts Row 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <div className="bg-white rounded-2xl shadow p-5 md:p-6">
             <h2 className="text-sm md:text-base font-semibold text-gray-700 mb-4">Order Volume Trend</h2>

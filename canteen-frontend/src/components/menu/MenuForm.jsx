@@ -56,7 +56,11 @@ const MenuForm = ({ item, categories, onSaved, onClose }) => {
     try {
       const formData = new FormData();
       Object.keys(form).forEach((key) => {
-        formData.append(key, form[key]);
+        if (key === 'is_available') {
+          formData.append(key, form[key] ? '1' : '0');
+        } else {
+          formData.append(key, form[key]);
+        }
       });
       if (image) {
         formData.append('image', image);
