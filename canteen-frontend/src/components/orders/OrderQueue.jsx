@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import Layout from '../common/Layout';
+import { SkeletonBlock, OrderCardSkeleton } from '../common/Skeleton';
 
 const STATUS_COLORS = {
   pending:   'bg-yellow-100 text-yellow-700',
@@ -49,30 +50,49 @@ const OrderQueue = () => {
 
   const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
 
+  const FilterBar = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-2 items-center">
+      {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((s) => (
+        <button key={s}
+          onClick={() => setFilter(s)}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all ${
+            filter === s
+              ? 'bg-[#D8BFD8] text-gray-700'
+              : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
+          }`}>
+          {s} ({s === 'all' ? orders.length : orders.filter((o) => o.status === s).length})
+        </button>
+      ))}
+      <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} orders</span>
+    </div>
+  );
+
+  const FilterBarSkeleton = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-2 items-center">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <SkeletonBlock key={i} className="h-9 w-24" />
+      ))}
+    </div>
+  );
+
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-xl text-gray-500">Loading orders...</div>
+      <Layout title="Order Queue">
+        <div className="p-4 md:p-6">
+          <FilterBarSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => <OrderCardSkeleton key={i} />)}
+          </div>
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Order Queue</h1>
+    <Layout title="Order Queue">
+      <div className="p-4 md:p-6">
 
-        <div className="bg-white rounded-2xl shadow p-4 mb-6 flex gap-2 flex-wrap">
-          {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((s) => (
-            <button key={s}
-              onClick={() => setFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize ${filter === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-              {s} {s === 'all' ? `(${orders.length})` : `(${orders.filter((o) => o.status === s).length})`}
-            </button>
-          ))}
-        </div>
+        <FilterBar />
 
         {filtered.length === 0 ? (
           <div className="text-center py-20 text-gray-400">No orders found.</div>
@@ -107,7 +127,7 @@ const OrderQueue = () => {
 
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-gray-500">Total</span>
-                  <span className="font-bold text-blue-600">
+                  <span className="font-bold text-gray-800">
                     ₱{Number(order.total_amount).toFixed(2)}
                   </span>
                 </div>
@@ -116,7 +136,7 @@ const OrderQueue = () => {
                   {NEXT_STATUS[order.status] && (
                     <button
                       onClick={() => handleUpdateStatus(order.id, NEXT_STATUS[order.status])}
-                      className="flex-1 bg-blue-600 text-white text-xs py-2 rounded-lg hover:bg-blue-700 font-medium capitalize">
+                      className="flex-1 bg-[#D8BFD8] text-gray-700 text-xs py-2 rounded-lg hover:bg-[#cbaecb] font-medium capitalize">
                       Mark as {NEXT_STATUS[order.status]}
                     </button>
                   )}

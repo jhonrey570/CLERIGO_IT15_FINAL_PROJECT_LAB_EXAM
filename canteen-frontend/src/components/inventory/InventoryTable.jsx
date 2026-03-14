@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Layout from '../common/Layout';
 import { SkeletonBlock, TableRowSkeleton } from '../common/Skeleton';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 const InventoryTable = () => {
   const { user } = useAuth();
@@ -60,23 +61,33 @@ const InventoryTable = () => {
 
   const lowStockItems = items.filter((i) => i.stock_qty <= i.low_stock_threshold);
 
-  const topbarActions = (
-    <input
-      type="text"
-      placeholder="Search items..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] w-48 md:w-64"
-    />
+  const FilterBar = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+      <input
+        type="text"
+        placeholder="Search items..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
+      />
+      <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} items</span>
+    </div>
+  );
+
+  const FilterBarSkeleton = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+      <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
+      <SkeletonBlock className="h-9 w-20" />
+    </div>
   );
 
   if (loading) {
     return (
-      <Layout title="Inventory Management" actions={topbarActions}>
+      <Layout title="Inventory Management">
         <div className="p-4 md:p-6">
-          <SkeletonBlock className="h-10 w-full mb-6" />
-          <div className="bg-white rounded-2xl shadow overflow-hidden">
-            <table className="w-full">
+          <FilterBarSkeleton />
+          <div className="bg-white rounded-2xl shadow overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   {['Item Name', 'Category', 'Stock Qty', 'Threshold', 'Status', 'Action'].map((h) => (
@@ -95,19 +106,21 @@ const InventoryTable = () => {
   }
 
   return (
-    <Layout title="Inventory Management" actions={topbarActions}>
+    <Layout title="Inventory Management">
       <div className="p-4 md:p-6">
 
         {success && (
-          <div className="bg-green-50 text-green-600 border border-green-200 rounded-xl px-4 py-3 mb-5 text-sm">
-            ✅ {success}
+          <div className="bg-green-50 text-green-600 border border-green-200 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+            <CheckCircle size={16} color="#16a34a" />
+            {success}
           </div>
         )}
 
         {lowStockItems.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-            <p className="text-red-600 font-semibold mb-2 text-sm md:text-base">
-              ⚠️ Low Stock Alert — {lowStockItems.length} item(s) need restocking
+            <p className="text-red-600 font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
+              <AlertTriangle size={18} color="#dc2626" />
+              Low Stock Alert — {lowStockItems.length} item(s) need restocking
             </p>
             <div className="flex flex-wrap gap-2">
               {lowStockItems.map((item) => (
@@ -118,6 +131,8 @@ const InventoryTable = () => {
             </div>
           </div>
         )}
+
+        <FilterBar />
 
         <div className="bg-white rounded-2xl shadow overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
@@ -181,7 +196,8 @@ const InventoryTable = () => {
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-600 border border-red-200 rounded-lg px-4 py-2 mb-4 text-sm">
+              <div className="bg-red-50 text-red-600 border border-red-200 rounded-lg px-4 py-2 mb-4 text-sm flex items-center gap-2">
+                <AlertTriangle size={15} color="#dc2626" />
                 {error}
               </div>
             )}

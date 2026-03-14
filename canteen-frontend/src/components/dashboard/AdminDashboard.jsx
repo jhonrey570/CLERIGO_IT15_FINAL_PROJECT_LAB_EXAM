@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Layout from '../common/Layout';
 import { SkeletonBlock, SummaryCardSkeleton, ChartSkeleton } from '../common/Skeleton';
@@ -12,8 +11,6 @@ import {
 const COLORS = ['#D8BFD8', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
-
   const [summary,      setSummary]      = useState(null);
   const [weeklySales,  setWeeklySales]  = useState([]);
   const [categoryData, setCategoryData] = useState([]);
@@ -90,32 +87,35 @@ const AdminDashboard = () => {
   };
 
   const topbarActions = (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5">
-        <label className="text-xs text-gray-500">From</label>
+    <button
+      onClick={handleExportCSV}
+      className="bg-[#D8BFD8] text-gray-700 text-sm px-4 py-2 rounded-xl hover:bg-[#cbaecb] font-medium">
+      Export CSV
+    </button>
+  );
+
+  const FilterBar = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+      <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-1.5">
+        <label className="text-sm text-gray-500">From</label>
         <input
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          className="text-xs border-none outline-none bg-transparent text-gray-700 w-28"
+          className="text-sm border-none outline-none bg-transparent text-gray-700"
         />
-        <label className="text-xs text-gray-500">To</label>
+        <label className="text-sm text-gray-500">To</label>
         <input
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="text-xs border-none outline-none bg-transparent text-gray-700 w-28"
+          className="text-sm border-none outline-none bg-transparent text-gray-700"
         />
       </div>
       <button
         onClick={handleApplyFilter}
-        className="bg-[#D8BFD8] text-gray-700 text-xs px-3 py-1.5 rounded-xl hover:bg-[#cbaecb] font-medium">
+        className="bg-[#D8BFD8] text-gray-700 text-sm px-3 py-1.5 rounded-lg hover:bg-[#cbaecb] font-medium">
         Apply Filter
-      </button>
-      <button
-        onClick={handleExportCSV}
-        className="bg-[#D8BFD8] text-gray-700 text-xs px-3 py-1.5 rounded-xl hover:bg-[#cbaecb] font-medium">
-        Export CSV
       </button>
     </div>
   );
@@ -124,6 +124,10 @@ const AdminDashboard = () => {
     return (
       <Layout title="Sales Dashboard" actions={topbarActions}>
         <div className="p-4 md:p-6">
+          <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+            <SkeletonBlock className="h-9 w-64" />
+            <SkeletonBlock className="h-9 w-24" />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
             <SummaryCardSkeleton />
             <SummaryCardSkeleton />
@@ -145,6 +149,8 @@ const AdminDashboard = () => {
   return (
     <Layout title="Sales Dashboard" actions={topbarActions}>
       <div className="p-4 md:p-6">
+
+        <FilterBar />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">

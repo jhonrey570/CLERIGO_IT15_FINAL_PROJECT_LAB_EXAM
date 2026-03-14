@@ -85,11 +85,58 @@ const MenuList = () => {
     </>
   );
 
+  const FilterBar = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+      <input
+        type="text"
+        placeholder="Search menu items..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
+      />
+      <div className="flex gap-2 flex-wrap items-center">
+        <button
+          onClick={() => setActiveCategory('all')}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            activeCategory === 'all'
+              ? 'bg-[#D8BFD8] text-gray-700'
+              : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
+          }`}>
+          All
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              activeCategory === cat.id
+                ? 'bg-[#D8BFD8] text-gray-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
+            }`}>
+            {cat.name}
+          </button>
+        ))}
+      </div>
+      <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} items</span>
+    </div>
+  );
+
+  const FilterBarSkeleton = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+      <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
+      <div className="flex gap-2 flex-wrap">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <SkeletonBlock key={i} className="h-9 w-20" />
+        ))}
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <Layout title="Menu Management" actions={topbarActions}>
-        <div className="p-6">
-          <SkeletonBlock className="h-10 w-full mb-6" />
+        <div className="p-4 md:p-6">
+          <FilterBarSkeleton />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {Array.from({ length: 8 }).map((_, i) => <MenuCardSkeleton key={i} />)}
           </div>
@@ -100,42 +147,8 @@ const MenuList = () => {
 
   return (
     <Layout title="Menu Management" actions={topbarActions}>
-      <div className="p-6">
-
-        <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
-          <input
-            type="text"
-            placeholder="Search menu items..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] w-64"
-          />
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                activeCategory === 'all'
-                  ? 'bg-[#D8BFD8] text-gray-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
-              }`}>
-              All
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  activeCategory === cat.id
-                    ? 'bg-[#D8BFD8] text-gray-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-[#f3eaf3]'
-                }`}>
-                {cat.name}
-              </button>
-            ))}
-          </div>
-          <span className="ml-auto text-sm text-gray-400">{filtered.length} items</span>
-        </div>
-
+      <div className="p-4 md:p-6">
+        <FilterBar />
         {filtered.length === 0 ? (
           <div className="text-center py-20 text-gray-400">No menu items found.</div>
         ) : (

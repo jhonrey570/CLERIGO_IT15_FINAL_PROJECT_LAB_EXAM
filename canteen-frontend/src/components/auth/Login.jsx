@@ -1,10 +1,11 @@
- import { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { UtensilsCrossed, AlertTriangle, ShieldCheck, CreditCard, User } from 'lucide-react';
 
 const Login = () => {
   const { login } = useAuth();
-  const navigate   = useNavigate();
+  const navigate  = useNavigate();
 
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
@@ -15,7 +16,6 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       const user = await login(email, password);
       if (user.role === 'admin') {
@@ -23,7 +23,7 @@ const Login = () => {
       } else if (user.role === 'cashier') {
         navigate('/pos');
       } else {
-        navigate('/orders');
+        navigate('/customer-menu');
       }
     } catch (err) {
       setError('Invalid email or password. Please try again.');
@@ -33,19 +33,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🍽️</div>
+          <div className="flex justify-center mb-3">
+            <UtensilsCrossed size={48} color="#D8BFD8" />
+          </div>
           <h1 className="text-3xl font-bold text-gray-800">Canteen System</h1>
-          <p className="text-gray-500 mt-1">Sign in to your account</p>
+          <p className="text-gray-500 mt-1 text-sm">Sign in to your account</p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 text-red-600 border border-red-200 rounded-lg px-4 py-3 mb-5 text-sm">
+          <div className="bg-red-50 text-red-600 border border-red-200 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+            <AlertTriangle size={15} color="#dc2626" />
             {error}
           </div>
         )}
@@ -62,7 +65,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="admin@canteen.com"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
             />
           </div>
 
@@ -76,27 +79,34 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 disabled:opacity-50"
-          >
+            className="w-full bg-[#D8BFD8] hover:bg-[#cbaecb] text-gray-700 font-semibold py-2.5 rounded-xl transition duration-200 disabled:opacity-50 text-sm">
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
         {/* Test Accounts */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg text-xs text-gray-500">
+        <div className="mt-6 p-4 bg-gray-50 rounded-xl text-xs text-gray-500 space-y-2">
           <p className="font-semibold text-gray-600 mb-2">Test Accounts:</p>
-          <p>👑 Admin: admin@canteen.com / password</p>
-          <p>💳 Cashier: cashier@canteen.com / password</p>
-          <p>👤 Customer: juan@email.com / password</p>
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={14} color="#8A8B8E" />
+            <span>Admin: admin@canteen.com / password</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CreditCard size={14} color="#8A8B8E" />
+            <span>Cashier: cashier@canteen.com / password</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <User size={14} color="#8A8B8E" />
+            <span>Customer: juan@email.com / password</span>
+          </div>
         </div>
-
       </div>
     </div>
   );

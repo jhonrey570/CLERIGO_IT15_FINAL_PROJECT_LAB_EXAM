@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import CustomerLayout from '../common/CustomerLayout';
+import { OrderCardSkeleton } from '../common/Skeleton';
 
 const STATUS_COLORS = {
   pending:   'bg-yellow-100 text-yellow-700',
@@ -12,7 +13,6 @@ const STATUS_COLORS = {
 };
 
 const MyOrders = () => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [orders,  setOrders]  = useState([]);
@@ -32,56 +32,33 @@ const MyOrders = () => {
     fetchMyOrders();
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-500">Loading your orders...</div>
-      </div>
-    );
-  }
+  const topbarActions = (
+    <button
+      onClick={() => navigate('/customer-menu')}
+      className="bg-[#D8BFD8] text-gray-700 px-4 py-2 rounded-xl hover:bg-[#cbaecb] font-medium text-sm">
+      + Place New Order
+    </button>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
-          <span className="text-xl font-bold text-gray-800">Canteen System</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">👤 {user?.name}</span>
-          <button onClick={() => navigate('/customer-menu')}
-            className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-            Browse Menu
-          </button>
-          <button onClick={handleLogout}
-            className="text-sm bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100">
-            Logout
-          </button>
-        </div>
-      </nav>
+    <CustomerLayout title="My Orders" actions={topbarActions}>
+      <div className="p-4 md:p-6">
 
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">My Orders</h1>
-          <button
-            onClick={() => navigate('/customer-menu')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-semibold text-sm">
-            + Place New Order
-          </button>
+        <div className="bg-white rounded-2xl shadow p-4 mb-6 flex items-center">
+          <span className="text-sm text-gray-400">{orders.length} orders</span>
         </div>
 
-        {orders.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => <OrderCardSkeleton key={i} />)}
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
             <div className="text-5xl mb-4">🧾</div>
             <p className="mb-4">You have no orders yet.</p>
             <button
               onClick={() => navigate('/customer-menu')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold text-sm">
+              className="bg-[#D8BFD8] text-gray-700 px-6 py-2 rounded-xl hover:bg-[#cbaecb] font-medium text-sm">
               Browse Menu & Order
             </button>
           </div>
@@ -116,7 +93,7 @@ const MyOrders = () => {
 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Total</span>
-                  <span className="font-bold text-blue-600">
+                  <span className="font-bold text-gray-800">
                     ₱{Number(order.total_amount).toFixed(2)}
                   </span>
                 </div>
@@ -125,7 +102,7 @@ const MyOrders = () => {
           </div>
         )}
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

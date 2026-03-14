@@ -33,19 +33,30 @@ const InventoryLogs = () => {
   );
 
   const topbarActions = (
-    <div className="flex flex-wrap items-center gap-2">
+    <button
+      onClick={() => navigate('/inventory')}
+      className="bg-[#D8BFD8] text-gray-700 text-sm px-4 py-2 rounded-xl hover:bg-[#cbaecb] font-medium whitespace-nowrap">
+      ← Back to Inventory
+    </button>
+  );
+
+  const FilterBar = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
       <input
         type="text"
         placeholder="Search by item, reason or user..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="border border-gray-200 rounded-xl px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8] w-48 md:w-64"
+        className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
       />
-      <button
-        onClick={() => navigate('/inventory')}
-        className="bg-[#D8BFD8] text-gray-700 text-sm px-4 py-1.5 rounded-xl hover:bg-[#cbaecb] font-medium whitespace-nowrap">
-        ← Back to Inventory
-      </button>
+      <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} logs</span>
+    </div>
+  );
+
+  const FilterBarSkeleton = () => (
+    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+      <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
+      <SkeletonBlock className="h-9 w-20" />
     </div>
   );
 
@@ -53,8 +64,8 @@ const InventoryLogs = () => {
     return (
       <Layout title="Inventory Logs" actions={topbarActions}>
         <div className="p-4 md:p-6">
-          <SkeletonBlock className="h-10 w-full mb-6" />
-          <div className="bg-white rounded-2xl shadow overflow-hidden">
+          <FilterBarSkeleton />
+          <div className="bg-white rounded-2xl shadow overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -76,6 +87,9 @@ const InventoryLogs = () => {
   return (
     <Layout title="Inventory Logs" actions={topbarActions}>
       <div className="p-4 md:p-6">
+
+        <FilterBar />
+
         <div className="bg-white rounded-2xl shadow overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-200">
