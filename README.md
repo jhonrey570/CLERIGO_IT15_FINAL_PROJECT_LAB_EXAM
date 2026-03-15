@@ -1,4 +1,4 @@
-# Canteen Management System
+# 🍽️ Canteen Management System
 
 ## 1.1. Canteen Management System
 1. IT15/L Integrative Programming — Final Project / Lab Exam
@@ -22,25 +22,34 @@ For testing
 
 ---
 
-## 1.4. Backend Setup (Laravel)
+## 1.4. Create Database in phpMyAdmin
+Before running the backend setup:
+1. Open http://localhost/phpmyadmin
+2. Click New
+3. Type canteen_db
+4. Click Create
+
+---
+
+## 1.5. Backend Setup (Laravel)
 bash
 1. cd canteen-backend
 2. composer install
 3. copy .env.example .env
-4. php artisan key:generate
-5. php artisan migrate --seed
-6. php artisan serve
-
-Note: Before running migrate --seed, open your .env file and make sure:
-- DB_CONNECTION=mysql
-- DB_PORT=3307 (use 3307 if 3306 is not working)
-- DB_DATABASE=canteen_db
-- DB_USERNAME=root
-- DB_PASSWORD= (leave blank for XAMPP)
+4. Open the .env file and update the database settings:
+   - DB_CONNECTION=mysql
+   - DB_HOST=127.0.0.1
+   - DB_PORT=3307 (use 3307 if 3306 is not working)
+   - DB_DATABASE=canteen_db
+   - DB_USERNAME=root
+   - DB_PASSWORD= (leave blank for XAMPP)
+5. php artisan key:generate
+6. php artisan migrate --seed
+7. php artisan serve
 
 ---
 
-## 1.5. Frontend Setup (React)
+## 1.6. Frontend Setup (React)
 bash
 1. cd canteen-frontend
 2. npm install
@@ -49,7 +58,7 @@ bash
 
 ---
 
-## 1.6. Default User Accounts (After Seeding)
+## 1.7. Default User Accounts (After Seeding)
 Role, Email, Password
 1. Admin — admin@canteen.com — password
 2. Cashier — cashier@canteen.com — password
@@ -57,14 +66,14 @@ Role, Email, Password
 
 ---
 
-## 1.7. GitHub Pushing
+## 1.8. GitHub Pushing
 1. git add .
 2. git commit -m "initial: setup repo structure and README"
 3. git push origin main
 
 ---
 
-## 1.8. Features
+## 1.9. Features
 1. Role-based authentication (Admin, Cashier, Customer)
 2. Menu management with image upload and category filtering
 3. Point-of-Sale (POS) interface for cashiers
@@ -75,7 +84,7 @@ Role, Email, Password
 
 ---
 
-## 1.9. Technologies Used
+## 1.10. Technologies Used
 1. Frontend — React.js, Tailwind CSS, Recharts
 2. Backend — Laravel, PHP
 3. Database — MySQL
@@ -84,7 +93,7 @@ Role, Email, Password
 
 ---
 
-## 1.10. Environment Variables (.env.example)
+## 1.11. Environment Variables (.env.example)
 Backend (canteen-backend/.env)
 1. APP_NAME=CanteenSystem
 2. APP_ENV=local
