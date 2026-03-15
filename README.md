@@ -23,8 +23,7 @@ For testing
 ---
 
 ## 1.4. Create Database in phpMyAdmin
-Note: 1st Option when creating database but if you want to create it in command prompt. Prompt the php artisan migrate --seed the message would show. (The database 'canteen_db' does not exist on the 'mysql' connection.) Just type yes.
-Would you like to create it? (yes/no)
+Note: 1st Option when creating database but if you want to create it in command prompt. Prompt the php artisan migrate --seed the message would show. (The database 'canteen_db' does not exist on the 'mysql' connection. Would you like to create it? (yes/no) Just type yes.
 Before running the backend setup: 
 1. Open http://localhost/phpmyadmin
 2. Click New
@@ -46,7 +45,7 @@ bash
    - DB_USERNAME=root
    - DB_PASSWORD= (leave blank for XAMPP)
 5. php artisan key:generate
-6. php artisan migrate --seed
+6. php artisan migrate --seed (Note: follow this if you want to create a database in command promt.)
 7. php artisan serve
 
 ---
@@ -145,7 +144,6 @@ Table, Description
 
 ## 2.3. Order Status Flow
 Pending → Preparing → Ready → Completed or Cancelled
-                             
 
 ---
 
