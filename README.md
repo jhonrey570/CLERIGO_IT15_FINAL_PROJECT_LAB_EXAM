@@ -1,4 +1,4 @@
-# 🍽️ Canteen Management System
+# Canteen Management System
 
 ## 1.1. Canteen Management System
 1. IT15/L Integrative Programming — Final Project / Lab Exam
