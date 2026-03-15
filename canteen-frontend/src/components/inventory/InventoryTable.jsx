@@ -5,6 +5,26 @@ import Layout from '../common/Layout';
 import { SkeletonBlock, TableRowSkeleton } from '../common/Skeleton';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 
+const FilterBar = ({ search, setSearch, filtered }) => (
+  <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+    <input
+      type="text"
+      placeholder="Search items..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
+    />
+    <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} items</span>
+  </div>
+);
+
+const FilterBarSkeleton = () => (
+  <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+    <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
+    <SkeletonBlock className="h-9 w-20" />
+  </div>
+);
+
 const InventoryTable = () => {
   const { user } = useAuth();
 
@@ -61,26 +81,6 @@ const InventoryTable = () => {
 
   const lowStockItems = items.filter((i) => i.stock_qty <= i.low_stock_threshold);
 
-  const FilterBar = () => (
-    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
-      <input
-        type="text"
-        placeholder="Search items..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
-      />
-      <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} items</span>
-    </div>
-  );
-
-  const FilterBarSkeleton = () => (
-    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
-      <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
-      <SkeletonBlock className="h-9 w-20" />
-    </div>
-  );
-
   if (loading) {
     return (
       <Layout title="Inventory Management">
@@ -132,7 +132,11 @@ const InventoryTable = () => {
           </div>
         )}
 
-        <FilterBar />
+        <FilterBar
+          search={search}
+          setSearch={setSearch}
+          filtered={filtered}
+        />
 
         <div className="bg-white rounded-2xl shadow overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">

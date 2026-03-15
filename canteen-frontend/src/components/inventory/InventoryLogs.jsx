@@ -4,6 +4,26 @@ import api from '../../services/api';
 import Layout from '../common/Layout';
 import { SkeletonBlock, TableRowSkeleton } from '../common/Skeleton';
 
+const FilterBar = ({ search, setSearch, filtered }) => (
+  <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+    <input
+      type="text"
+      placeholder="Search by item, reason or user..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
+    />
+    <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} logs</span>
+  </div>
+);
+
+const FilterBarSkeleton = () => (
+  <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
+    <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
+    <SkeletonBlock className="h-9 w-20" />
+  </div>
+);
+
 const InventoryLogs = () => {
   const navigate = useNavigate();
 
@@ -40,26 +60,6 @@ const InventoryLogs = () => {
     </button>
   );
 
-  const FilterBar = () => (
-    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
-      <input
-        type="text"
-        placeholder="Search by item, reason or user..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="flex-1 min-w-[160px] border border-gray-200 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8BFD8]"
-      />
-      <span className="ml-auto text-sm text-gray-400 whitespace-nowrap">{filtered.length} logs</span>
-    </div>
-  );
-
-  const FilterBarSkeleton = () => (
-    <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-3 items-center">
-      <SkeletonBlock className="h-9 flex-1 min-w-[160px]" />
-      <SkeletonBlock className="h-9 w-20" />
-    </div>
-  );
-
   if (loading) {
     return (
       <Layout title="Inventory Logs" actions={topbarActions}>
@@ -88,7 +88,11 @@ const InventoryLogs = () => {
     <Layout title="Inventory Logs" actions={topbarActions}>
       <div className="p-4 md:p-6">
 
-        <FilterBar />
+        <FilterBar
+          search={search}
+          setSearch={setSearch}
+          filtered={filtered}
+        />
 
         <div className="bg-white rounded-2xl shadow overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
