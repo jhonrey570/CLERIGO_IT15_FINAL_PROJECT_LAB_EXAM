@@ -32,7 +32,7 @@ Before running the backend setup:
 
 ---
 
-## 1.5. Backend Setup (Laravel)
+## 1.5. Backend Setup (Laravel) Note: Start here! for simplicity 
 bash
 1. cd canteen-backend
 2. composer install
