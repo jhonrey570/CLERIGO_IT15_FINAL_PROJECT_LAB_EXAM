@@ -23,7 +23,9 @@ For testing
 ---
 
 ## 1.4. Create Database in phpMyAdmin
-Before running the backend setup:
+Note: 1st Option when creating database but if you want to create it in command prompt. Prompt the php artisan migrate --seed the message would show. (The database 'canteen_db' does not exist on the 'mysql' connection.) Just type yes.
+Would you like to create it? (yes/no)
+Before running the backend setup: 
 1. Open http://localhost/phpmyadmin
 2. Click New
 3. Type canteen_db
@@ -39,7 +41,7 @@ bash
 4. Open the .env file and update the database settings:
    - DB_CONNECTION=mysql
    - DB_HOST=127.0.0.1
-   - DB_PORT=3307 (use 3307 if 3306 is not working)
+   - DB_PORT=3307 (use 3307 to 3309 if 3306 is not working. Better if when you open your XAMPP control panel you can see the number of ports that you are currently using.)
    - DB_DATABASE=canteen_db
    - DB_USERNAME=root
    - DB_PASSWORD= (leave blank for XAMPP)
@@ -59,10 +61,11 @@ bash
 ---
 
 ## 1.7. Default User Accounts (After Seeding)
-Role, Email, Password
+Role, Email, Password (Note: If customer@canteen.com does not work, try juan@email.com — password)
 1. Admin — admin@canteen.com — password
 2. Cashier — cashier@canteen.com — password
 3. Customer — customer@canteen.com — password
+4. Customer — juan@email.com — password
 
 ---
 
@@ -141,8 +144,8 @@ Table, Description
 ---
 
 ## 2.3. Order Status Flow
-Pending → Preparing → Ready → Completed
-                             ↘ Cancelled
+Pending → Preparing → Ready → Completed or Cancelled
+                             
 
 ---
 
