@@ -26,10 +26,17 @@ For testing
 bash
 1. cd canteen-backend
 2. composer install
-3. cp .env.example .env
+3. copy .env.example .env
 4. php artisan key:generate
 5. php artisan migrate --seed
 6. php artisan serve
+
+Note: Before running migrate --seed, open your .env file and make sure:
+- DB_CONNECTION=mysql
+- DB_PORT=3307 (use 3307 if 3306 is not working)
+- DB_DATABASE=canteen_db
+- DB_USERNAME=root
+- DB_PASSWORD= (leave blank for XAMPP)
 
 ---
 
@@ -37,7 +44,7 @@ bash
 bash
 1. cd canteen-frontend
 2. npm install
-3. cp .env.example .env
+3. copy .env.example .env
 4. npm run dev
 
 ---
@@ -140,3 +147,5 @@ Feature, Admin, Cashier, Customer
 6. Adjust Stock — Yes, Yes, No
 7. View Reports — Yes, No, No
 8. Manage Users — Yes, No, No
+
+---
