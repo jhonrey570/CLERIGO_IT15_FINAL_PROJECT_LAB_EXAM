@@ -65,6 +65,7 @@ Role, Email, Password (Note: If customer@canteen.com does not work, try juan@ema
 2. Cashier — cashier@canteen.com — password
 3. Customer — customer@canteen.com — password
 4. Customer — juan@email.com — password
+5. Customer — maria@email.com — password
 
 ---
 
