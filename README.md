@@ -24,7 +24,7 @@ For testing
 
 ## 1.4. Create Database in phpMyAdmin
 Note: 1st Option when creating database but if you want to create it in command prompt. Prompt the php artisan migrate --seed the message would show. (The database 'canteen_db' does not exist on the 'mysql' connection. Would you like to create it? (yes/no) Just type yes.
-Before running the backend setup: 
+Before running the backend setup:
 1. Open http://localhost/phpmyadmin
 2. Click New
 3. Type canteen_db
@@ -32,7 +32,7 @@ Before running the backend setup:
 
 ---
 
-## 1.5. Backend Setup (Laravel) Note: Start here! for simplicity 
+## 1.5. Backend Setup (Laravel) Note: Start here! for simplicity
 bash
 1. cd canteen-backend
 2. composer install
@@ -44,13 +44,25 @@ bash
    - DB_DATABASE=canteen_db
    - DB_USERNAME=root
    - DB_PASSWORD= (leave blank for XAMPP)
+   - FILESYSTEM_DISK=public (change from local to public for images to display correctly)
+   - FRONTEND_URL=http://localhost:5173
 5. php artisan key:generate
-6. php artisan migrate --seed (Note: follow this if you want to create a database in command promt.)
-7. php artisan serve
+6. php artisan migrate --seed (Note: follow this if you want to create a database in command prompt.)
+7. php artisan storage:link (Important: run this so uploaded images are publicly accessible)
+8. php artisan serve
 
 ---
 
-## 1.6. Frontend Setup (React)
+## 1.6. Image Setup Note
+If menu item images are not displaying after setup:
+1. Make sure FILESYSTEM_DISK=public in your .env file
+2. Run php artisan storage:link in the canteen-backend folder
+3. Re-upload the images on the menu items that are missing images
+4. Images will now display correctly
+
+---
+
+## 1.7. Frontend Setup (React)
 bash
 1. cd canteen-frontend
 2. npm install
@@ -59,7 +71,7 @@ bash
 
 ---
 
-## 1.7. Default User Accounts (After Seeding)
+## 1.8. Default User Accounts (After Seeding)
 Role, Email, Password (Note: If customer@canteen.com does not work, try juan@email.com — password)
 1. Admin — admin@canteen.com — password
 2. Cashier — cashier@canteen.com — password
@@ -69,14 +81,14 @@ Role, Email, Password (Note: If customer@canteen.com does not work, try juan@ema
 
 ---
 
-## 1.8. GitHub Pushing
+## 1.9. GitHub Pushing
 1. git add .
 2. git commit -m "initial: setup repo structure and README"
 3. git push origin main
 
 ---
 
-## 1.9. Features
+## 1.10. Features
 1. Role-based authentication (Admin, Cashier, Customer)
 2. Menu management with image upload and category filtering
 3. Point-of-Sale (POS) interface for cashiers
@@ -87,7 +99,7 @@ Role, Email, Password (Note: If customer@canteen.com does not work, try juan@ema
 
 ---
 
-## 1.10. Technologies Used
+## 1.11. Technologies Used
 1. Frontend — React.js, Tailwind CSS, Recharts
 2. Backend — Laravel, PHP
 3. Database — MySQL
@@ -96,7 +108,7 @@ Role, Email, Password (Note: If customer@canteen.com does not work, try juan@ema
 
 ---
 
-## 1.11. Environment Variables (.env.example)
+## 1.12. Environment Variables (.env.example)
 Backend (canteen-backend/.env)
 1. APP_NAME=CanteenSystem
 2. APP_ENV=local
@@ -109,7 +121,7 @@ Backend (canteen-backend/.env)
 9. DB_DATABASE=canteen_db
 10. DB_USERNAME=root
 11. DB_PASSWORD= (leave blank for XAMPP)
-12. FILESYSTEM_DISK=local
+12. FILESYSTEM_DISK=public (change from local to public for images to work)
 13. FRONTEND_URL=http://localhost:5173
 
 Frontend (canteen-frontend/.env)
